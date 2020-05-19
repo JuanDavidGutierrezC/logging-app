@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: 'logging-app
+
+  Sample SAM Template for logging-app
+
+  '
+Globals:
+  Function:
+    Timeout: 3
+Resources:
+  HelloWorldNodeJSFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://logging-app-code/63382c8dfa2da1fdfff7442f9a39af49
+      Handler: app.lambdaHandler
+      Runtime: nodejs12.x
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            Path: /hello-node
+            Method: get
+  HelloWorldPythonFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://logging-app-code/d39d3482ba1ce329e9e14050340066e6
+      Handler: app.lambda_handler
+      Runtime: python3.8
+      Events:
+        HelloWorld:
+          Type: Api
+          Properties:
+            Path: /hello-python
+            Method: get
+  HelloWorldNodeJSFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn: HelloWorldNodeJSFunction
+    Properties:
+      RetentionInDays: 14
+      LogGroupName:
+        Fn::Join:
+        - ''
+        - - /aws/lambda/
+          - Ref: HelloWorldNodeJSFunction
+  HelloWorldPythonFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DependsOn: HelloWorldPythonFunction
+    Properties:
+      RetentionInDays: 14
+      LogGroupName:
+        Fn::Join:
+        - ''
+        - - /aws/lambda/
+          - Ref: HelloWorldPythonFunction
+Outputs:
+  HelloWorldApi:
+    Description: API Gateway endpoint URL for Prod stage for Hello World function
+    Value:
+      Fn::Sub: https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod
